@@ -14,6 +14,14 @@ const FACTORS = {
 
 const TERM_OPTIONS = Object.keys(FACTORS).map(Number)
 
+const STEPS = [
+  { eyebrow: 'Paso 1', title: 'Nombre' },
+  { eyebrow: 'Paso 2', title: 'Apellidos' },
+  { eyebrow: 'Paso 3', title: 'Contacto' },
+  { eyebrow: 'Paso 4', title: 'Crédito' },
+  { eyebrow: 'Paso 5', title: 'Cotización' }
+]
+
 function formatMoney(value) {
   return Number(value || 0).toLocaleString('es-MX', {
     style: 'currency',
@@ -48,9 +56,12 @@ function getQuoteFileName(name) {
 }
 
 export default function QuoteForm() {
+  const [activeStep, setActiveStep] = useState(0)
   const [status, setStatus] = useState('')
   const [form, setForm] = useState({
-    name: '',
+    firstName: '',
+    paternalLastName: '',
+    maternalLastName: '',
     businessName: '',
     phone: '',
     requestedAmount: 20000,
@@ -58,7 +69,12 @@ export default function QuoteForm() {
     notes: ''
   })
 
+  const fullName = [form.firstName, form.paternalLastName, form.maternalLastName]
+    .filter(Boolean)
+    .join(' ')
+
   const updateField = (key, value) => {
+    setStatus('')
     setForm((current) => ({ ...current, [key]: value }))
   }
 
@@ -80,9 +96,10 @@ export default function QuoteForm() {
 
   const message = useMemo(() => {
     const lines = [
-      `Cotización Crédito IMSS`,
-      `Nombre: ${form.name || 'Pendiente'}`,
+      'Cotización Crédito IMSS',
+      `Nombre: ${fullName || 'Pendiente'}`,
       `Razón social: ${form.businessName || 'Pendiente'}`,
+      `WhatsApp: ${form.phone || 'Pendiente'}`,
       `Monto solicitado: ${formatMoney(quote.amount)}`,
       `Plazo: ${form.term} meses`,
       `Descuento mensual estimado: ${formatMoney(quote.monthlyPayment)}`,
@@ -96,7 +113,15 @@ export default function QuoteForm() {
     lines.push('Te comparto la cotización en PDF con el detalle.')
 
     return lines.join('\n')
-  }, [form, quote])
+  }, [form, fullName, quote])
+
+  const nextStep = () => {
+    setActiveStep((current) => Math.min(current + 1, STEPS.length - 1))
+  }
+
+  const previousStep = () => {
+    setActiveStep((current) => Math.max(current - 1, 0))
+  }
 
   const createPDF = async () => {
     const el = document.getElementById('quote-preview')
@@ -130,7 +155,7 @@ export default function QuoteForm() {
     try {
       setStatus('Generando PDF...')
       const pdf = await createPDF()
-      pdf.save(getQuoteFileName(form.name))
+      pdf.save(getQuoteFileName(fullName))
       setStatus('PDF descargado correctamente.')
     } catch {
       setStatus('No pude generar el PDF. Revisa la información e intenta de nuevo.')
@@ -141,7 +166,7 @@ export default function QuoteForm() {
     try {
       setStatus('Preparando PDF para WhatsApp...')
       const pdf = await createPDF()
-      const file = new File([pdf.output('blob')], getQuoteFileName(form.name), {
+      const file = new File([pdf.output('blob')], getQuoteFileName(fullName), {
         type: 'application/pdf'
       })
 
@@ -173,49 +198,79 @@ export default function QuoteForm() {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  return (
-    <div className="quote-app">
-      <section className="form-panel" aria-label="Datos de la cotización">
-        <div className="panel-heading">
-          <div>
-            <span>Cotizador</span>
-            <strong>Datos del cliente</strong>
-          </div>
-          <small>MXN</small>
+  const renderStep = () => {
+    if (activeStep === 0) {
+      return (
+        <div className="step-fields">
+          <label>
+            Nombre
+            <input
+              autoFocus
+              value={form.firstName}
+              onChange={(event) => updateField('firstName', event.target.value)}
+              placeholder="Ej. Joshua"
+            />
+          </label>
         </div>
+      )
+    }
 
-        <label>
-          Nombre
-          <input
-            value={form.name}
-            onChange={(event) => updateField('name', event.target.value)}
-            placeholder="Nombre del cliente"
-          />
-        </label>
+    if (activeStep === 1) {
+      return (
+        <div className="step-fields">
+          <label>
+            Apellido paterno
+            <input
+              autoFocus
+              value={form.paternalLastName}
+              onChange={(event) => updateField('paternalLastName', event.target.value)}
+              placeholder="Ej. Torres"
+            />
+          </label>
+          <label>
+            Apellido materno
+            <input
+              value={form.maternalLastName}
+              onChange={(event) => updateField('maternalLastName', event.target.value)}
+              placeholder="Ej. Castro"
+            />
+          </label>
+        </div>
+      )
+    }
 
-        <label>
-          Razón social
-          <input
-            value={form.businessName}
-            onChange={(event) => updateField('businessName', event.target.value)}
-            placeholder="Empresa o razón social"
-          />
-        </label>
+    if (activeStep === 2) {
+      return (
+        <div className="step-fields">
+          <label>
+            WhatsApp
+            <input
+              autoFocus
+              inputMode="tel"
+              value={form.phone}
+              onChange={(event) => updateField('phone', event.target.value)}
+              placeholder="10 dígitos o con lada"
+            />
+          </label>
+          <label>
+            Razón social
+            <input
+              value={form.businessName}
+              onChange={(event) => updateField('businessName', event.target.value)}
+              placeholder="Empresa o razón social"
+            />
+          </label>
+        </div>
+      )
+    }
 
-        <label>
-          WhatsApp
-          <input
-            inputMode="tel"
-            value={form.phone}
-            onChange={(event) => updateField('phone', event.target.value)}
-            placeholder="10 dígitos o con lada"
-          />
-        </label>
-
-        <div className="field-grid">
+    if (activeStep === 3) {
+      return (
+        <div className="step-fields">
           <label>
             Monto solicitado
             <input
+              autoFocus
               type="number"
               min="0"
               step="100"
@@ -223,7 +278,6 @@ export default function QuoteForm() {
               onChange={(event) => updateField('requestedAmount', event.target.value)}
             />
           </label>
-
           <label>
             Plazo
             <select
@@ -237,123 +291,222 @@ export default function QuoteForm() {
               ))}
             </select>
           </label>
+          <label>
+            Notas
+            <textarea
+              value={form.notes}
+              onChange={(event) => updateField('notes', event.target.value)}
+              placeholder="Observaciones, vigencia o documentos pendientes"
+            />
+          </label>
         </div>
+      )
+    }
 
-        <label>
-          Notas
-          <textarea
-            value={form.notes}
-            onChange={(event) => updateField('notes', event.target.value)}
-            placeholder="Observaciones, vigencia o documentos pendientes"
-          />
-        </label>
+    return (
+      <div className="finish-panel">
+        <div>
+          <span>Descuento mensual estimado</span>
+          <strong>{formatMoney(quote.monthlyPayment)}</strong>
+        </div>
+        <p>
+          Cotización preparada para {fullName || 'el cliente'} a {form.term} meses.
+        </p>
+        <button type="button" onClick={sendWhatsAppWithPDF}>
+          Enviar PDF por WhatsApp
+        </button>
+      </div>
+    )
+  }
 
-        <div className="summary-strip">
-          <div>
-            <span>Descuento mensual</span>
-            <strong>{formatMoney(quote.monthlyPayment)}</strong>
+  return (
+    <div className="page-shell">
+      <section className="hero-panel">
+        <div className="hero-copy">
+          <span>Crédito IMSS</span>
+          <h2>Cotiza en minutos con descuento mensual estimado</h2>
+          <p>
+            Captura los datos del cliente, el monto solicitado y el plazo para generar
+            una cotización lista para descargar o compartir.
+          </p>
+          <div className="hero-metrics">
+            <div>
+              <strong>18 a 60</strong>
+              <span>meses</span>
+            </div>
+            <div>
+              <strong>PDF</strong>
+              <span>cotización</span>
+            </div>
+            <div>
+              <strong>MXN</strong>
+              <span>moneda</span>
+            </div>
           </div>
-          <button type="button" onClick={sendWhatsAppWithPDF}>
-            Enviar PDF por WhatsApp
-          </button>
+        </div>
+        <div className="hero-rate-card">
+          <span>Estimado actual</span>
+          <strong>{formatMoney(quote.monthlyPayment)}</strong>
+          <small>{formatMoney(quote.amount)} a {form.term} meses</small>
         </div>
       </section>
 
-      <aside className="preview">
-        <div className="result-panel">
-          <div>
-            <span>Descuento mensual</span>
-            <strong>{formatMoney(quote.monthlyPayment)}</strong>
-          </div>
-          <div>
-            <span>Total estimado</span>
-            <strong>{formatMoney(quote.totalPayment)}</strong>
-          </div>
-          <div>
-            <span>Plazo</span>
-            <strong>{form.term} meses</strong>
-          </div>
-        </div>
+      <section className="info-grid" aria-label="Información del crédito">
+        <article>
+          <span>Proceso</span>
+          <h3>Cuestionario guiado</h3>
+          <p>Los datos se piden en orden para evitar capturas incompletas y mantener visible el avance.</p>
+        </article>
+        <article>
+          <span>Cálculo</span>
+          <h3>Factor por plazo</h3>
+          <p>El descuento mensual se calcula con el factor correspondiente por cada $1,000 solicitados.</p>
+        </article>
+        <article>
+          <span>Entrega</span>
+          <h3>PDF y WhatsApp</h3>
+          <p>La cotización se genera en PDF y el mensaje incluye nombre, razón social, monto y plazo.</p>
+        </article>
+      </section>
 
-        <div id="quote-preview" className="preview-box">
-          <div className="quote-header">
+      <div className="quote-app">
+        <section className="form-panel" aria-label="Cuestionario de cotización">
+          <div className="panel-heading">
             <div>
-              <span>Cotización</span>
-              <h2>Crédito IMSS</h2>
+              <span>{STEPS[activeStep].eyebrow}</span>
+              <strong>{STEPS[activeStep].title}</strong>
             </div>
-            <time>{new Date().toLocaleDateString('es-MX')}</time>
+            <small>{activeStep + 1}/{STEPS.length}</small>
           </div>
 
-          <div className="client-block">
+          <div className="stepper" aria-label="Progreso">
+            {STEPS.map((step, index) => (
+              <button
+                key={step.title}
+                type="button"
+                className={index === activeStep ? 'active' : ''}
+                onClick={() => setActiveStep(index)}
+                aria-label={step.title}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+
+          {renderStep()}
+
+          <div className="wizard-actions">
+            <button type="button" className="ghost-action" onClick={previousStep} disabled={activeStep === 0}>
+              Atrás
+            </button>
+            {activeStep < STEPS.length - 1 ? (
+              <button type="button" className="primary-action" onClick={nextStep}>
+                Siguiente
+              </button>
+            ) : (
+              <button type="button" className="primary-action" onClick={sendWhatsAppWithPDF}>
+                Enviar PDF por WhatsApp
+              </button>
+            )}
+          </div>
+        </section>
+
+        <aside className="preview">
+          <div className="result-panel">
             <div>
-              <span>Nombre</span>
-              <strong>{form.name || '-'}</strong>
+              <span>Descuento mensual</span>
+              <strong>{formatMoney(quote.monthlyPayment)}</strong>
             </div>
             <div>
-              <span>Razón social</span>
-              <strong>{form.businessName || '-'}</strong>
+              <span>Total estimado</span>
+              <strong>{formatMoney(quote.totalPayment)}</strong>
             </div>
             <div>
-              <span>WhatsApp</span>
-              <strong>{form.phone || '-'}</strong>
+              <span>Plazo</span>
+              <strong>{form.term} meses</strong>
             </div>
           </div>
 
-          <table className="quote-table">
-            <tbody>
-              <tr>
-                <th>Monto solicitado</th>
-                <td>{formatMoney(quote.amount)}</td>
-              </tr>
-              <tr>
-                <th>Plazo</th>
-                <td>{form.term} meses</td>
-              </tr>
-              <tr>
-                <th>Factor</th>
-                <td>{quote.factor.toFixed(4)}</td>
-              </tr>
-              <tr>
-                <th>Descuento mensual estimado</th>
-                <td>{formatMoney(quote.monthlyPayment)}</td>
-              </tr>
-              <tr>
-                <th>Total estimado a pagar</th>
-                <td>{formatMoney(quote.totalPayment)}</td>
-              </tr>
-              <tr>
-                <th>Costo financiero estimado</th>
-                <td>{formatMoney(quote.financeCost)}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          {form.notes.trim() ? (
-            <div className="notes-block">
-              <span>Notas</span>
-              <p>{form.notes.trim()}</p>
+          <div id="quote-preview" className="preview-box">
+            <div className="quote-header">
+              <div>
+                <span>Cotización</span>
+                <h2>Crédito IMSS</h2>
+              </div>
+              <time>{new Date().toLocaleDateString('es-MX')}</time>
             </div>
-          ) : null}
 
-          <p className="quote-footnote">
-            Cálculo estimado con factor por cada $1,000 de monto solicitado.
-          </p>
-        </div>
+            <div className="client-block">
+              <div>
+                <span>Nombre</span>
+                <strong>{fullName || '-'}</strong>
+              </div>
+              <div>
+                <span>Razón social</span>
+                <strong>{form.businessName || '-'}</strong>
+              </div>
+              <div>
+                <span>WhatsApp</span>
+                <strong>{form.phone || '-'}</strong>
+              </div>
+            </div>
 
-        <div className="preview-actions">
-          <button type="button" className="primary-action" onClick={sendWhatsAppWithPDF}>
-            Enviar PDF por WhatsApp
-          </button>
-          <button type="button" className="ghost-action" onClick={downloadPDF}>
-            Descargar PDF
-          </button>
-          <button type="button" className="ghost-action" onClick={openWhatsApp}>
-            Solo mensaje
-          </button>
-        </div>
+            <table className="quote-table">
+              <tbody>
+                <tr>
+                  <th>Monto solicitado</th>
+                  <td>{formatMoney(quote.amount)}</td>
+                </tr>
+                <tr>
+                  <th>Plazo</th>
+                  <td>{form.term} meses</td>
+                </tr>
+                <tr>
+                  <th>Factor</th>
+                  <td>{quote.factor.toFixed(4)}</td>
+                </tr>
+                <tr>
+                  <th>Descuento mensual estimado</th>
+                  <td>{formatMoney(quote.monthlyPayment)}</td>
+                </tr>
+                <tr>
+                  <th>Total estimado a pagar</th>
+                  <td>{formatMoney(quote.totalPayment)}</td>
+                </tr>
+                <tr>
+                  <th>Costo financiero estimado</th>
+                  <td>{formatMoney(quote.financeCost)}</td>
+                </tr>
+              </tbody>
+            </table>
 
-        {status ? <p className="status-message">{status}</p> : null}
-      </aside>
+            {form.notes.trim() ? (
+              <div className="notes-block">
+                <span>Notas</span>
+                <p>{form.notes.trim()}</p>
+              </div>
+            ) : null}
+
+            <p className="quote-footnote">
+              Cálculo estimado con factor por cada $1,000 de monto solicitado.
+            </p>
+          </div>
+
+          <div className="preview-actions">
+            <button type="button" className="primary-action" onClick={sendWhatsAppWithPDF}>
+              Enviar PDF por WhatsApp
+            </button>
+            <button type="button" className="ghost-action" onClick={downloadPDF}>
+              Descargar PDF
+            </button>
+            <button type="button" className="ghost-action" onClick={openWhatsApp}>
+              Solo mensaje
+            </button>
+          </div>
+
+          {status ? <p className="status-message">{status}</p> : null}
+        </aside>
+      </div>
     </div>
   )
 }

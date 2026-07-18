@@ -12,9 +12,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(135deg, rgba(16, 185, 129, 0.12), transparent 34%),
-    linear-gradient(315deg, rgba(37, 99, 235, 0.12), transparent 32%),
-    #f4f7fb;
+    linear-gradient(135deg, rgba(20, 184, 166, 0.13), transparent 30%),
+    linear-gradient(315deg, rgba(37, 99, 235, 0.11), transparent 34%),
+    #f5f7fb;
 }
 
 button,
@@ -22,6 +22,11 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
 .app {
@@ -34,23 +39,152 @@ header {
   align-items: end;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
-header span {
+header span,
+.hero-copy > span,
+.info-grid article > span,
+.panel-heading span,
+.quote-header span,
+.client-block span,
+.notes-block span,
+.result-panel span,
+.finish-panel span {
   color: #0f766e;
   display: block;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 850;
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
 header h1 {
   font-size: 34px;
-  font-weight: 850;
+  font-weight: 900;
   line-height: 1;
   margin: 4px 0 0;
+}
+
+.page-shell {
+  display: grid;
+  gap: 20px;
+}
+
+.hero-panel {
+  background: #12223a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #ffffff;
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  overflow: hidden;
+  padding: 28px;
+  position: relative;
+}
+
+.hero-panel::after {
+  background:
+    linear-gradient(135deg, rgba(16, 185, 129, 0.3), transparent 58%),
+    linear-gradient(315deg, rgba(59, 130, 246, 0.26), transparent 52%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.hero-copy,
+.hero-rate-card {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-copy > span {
+  color: #99f6e4;
+}
+
+.hero-copy h2 {
+  font-size: clamp(34px, 5vw, 58px);
+  line-height: 0.98;
+  margin: 10px 0 14px;
+  max-width: 720px;
+}
+
+.hero-copy p {
+  color: #dbeafe;
+  font-size: 17px;
+  margin: 0;
+  max-width: 650px;
+}
+
+.hero-metrics {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 150px));
+  margin-top: 26px;
+}
+
+.hero-metrics div,
+.hero-rate-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.hero-metrics strong,
+.hero-rate-card strong {
+  display: block;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.hero-metrics span,
+.hero-rate-card span,
+.hero-rate-card small {
+  color: #cbd5e1;
+  display: block;
+}
+
+.hero-rate-card {
+  align-self: end;
+}
+
+.hero-rate-card strong {
+  font-size: 32px;
+  margin: 8px 0;
+}
+
+.info-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.info-grid article,
+.form-panel,
+.preview-box,
+.result-panel,
+.preview-actions {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(203, 213, 225, 0.88);
+  border-radius: 8px;
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.09);
+}
+
+.info-grid article {
+  padding: 18px;
+}
+
+.info-grid h3 {
+  font-size: 18px;
+  margin: 5px 0 7px;
+}
+
+.info-grid p {
+  color: #526174;
+  margin: 0;
 }
 
 .quote-app {
@@ -60,18 +194,9 @@ header h1 {
   grid-template-columns: minmax(0, 0.95fr) minmax(380px, 500px);
 }
 
-.form-panel,
-.preview-box,
-.result-panel {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(203, 213, 225, 0.85);
-  border-radius: 8px;
-  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.1);
-}
-
 .form-panel {
   display: grid;
-  gap: 15px;
+  gap: 18px;
   padding: 20px;
 }
 
@@ -85,7 +210,7 @@ header h1 {
 
 .panel-heading strong {
   display: block;
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .panel-heading small {
@@ -93,28 +218,43 @@ header h1 {
   border: 1px solid #b6e4da;
   border-radius: 999px;
   color: #0f766e;
-  font-weight: 800;
+  font-weight: 850;
   padding: 5px 10px;
 }
 
-.panel-heading span,
-.quote-header span,
-.client-block span,
-.notes-block span,
-.result-panel span {
+.stepper {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.stepper button {
+  background: #edf2f7;
+  border: 1px solid #d6e0ea;
+  border-radius: 8px;
   color: #64748b;
-  display: block;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
+  cursor: pointer;
+  font-weight: 850;
+  min-height: 38px;
+}
+
+.stepper button.active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+}
+
+.step-fields {
+  display: grid;
+  gap: 15px;
+  min-height: 274px;
 }
 
 label {
   color: #334155;
   display: grid;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 750;
   gap: 7px;
 }
 
@@ -125,13 +265,13 @@ textarea {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   color: #0f172a;
-  min-height: 46px;
-  padding: 10px 12px;
+  min-height: 50px;
+  padding: 11px 12px;
   width: 100%;
 }
 
 textarea {
-  min-height: 96px;
+  min-height: 98px;
   resize: vertical;
 }
 
@@ -143,38 +283,34 @@ textarea:focus {
   outline: none;
 }
 
-.field-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: 1fr 165px;
-}
-
-.summary-strip {
-  align-items: center;
-  background: #12223a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.finish-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  color: #ffffff;
   display: grid;
   gap: 14px;
-  grid-template-columns: 1fr;
-  padding: 16px;
+  min-height: 274px;
+  padding: 18px;
 }
 
-.summary-strip span {
-  color: #bad0e8;
+.finish-panel strong {
   display: block;
-  font-size: 13px;
+  font-size: 34px;
+  line-height: 1.05;
+  margin-top: 4px;
 }
 
-.summary-strip strong {
-  display: block;
-  font-size: 28px;
-  line-height: 1.15;
-  margin-top: 2px;
+.finish-panel p {
+  color: #526174;
+  margin: 0;
 }
 
-.summary-strip button,
+.wizard-actions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 130px 1fr;
+}
+
 .primary-action {
   background: #16a34a;
   border: 0;
@@ -188,7 +324,6 @@ textarea:focus {
   width: 100%;
 }
 
-.summary-strip button:hover,
 .primary-action:hover {
   background: #15803d;
 }
@@ -213,6 +348,14 @@ textarea:focus {
   border-radius: 8px;
   min-width: 0;
   padding: 10px;
+}
+
+.result-panel span,
+.client-block span,
+.quote-header span,
+.notes-block span,
+.finish-panel span {
+  color: #64748b;
 }
 
 .result-panel strong {
@@ -243,7 +386,7 @@ textarea:focus {
 .quote-header time {
   color: #475569;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 750;
 }
 
 .client-block {
@@ -287,7 +430,7 @@ textarea:focus {
 .quote-table th {
   color: #475569;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 750;
   padding-right: 14px;
   width: 52%;
 }
@@ -317,14 +460,12 @@ textarea:focus {
 }
 
 .preview-actions {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(203, 213, 225, 0.85);
-  border-radius: 8px;
-  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.1);
+  bottom: 12px;
   display: grid;
   gap: 9px;
   grid-template-columns: 1fr 1fr;
   padding: 10px;
+  position: sticky;
 }
 
 .preview-actions .primary-action {
@@ -337,7 +478,7 @@ textarea:focus {
   border-radius: 8px;
   color: #172033;
   cursor: pointer;
-  font-weight: 800;
+  font-weight: 850;
   min-height: 44px;
   padding: 10px 12px;
 }
@@ -352,12 +493,12 @@ textarea:focus {
   border-radius: 8px;
   color: #065f46;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 750;
   margin: 0;
   padding: 10px 12px;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 960px) {
   .app {
     padding: 18px;
   }
@@ -367,9 +508,15 @@ textarea:focus {
     display: block;
   }
 
-  .quote-app,
-  .field-grid {
+  .hero-panel,
+  .info-grid,
+  .quote-app {
     grid-template-columns: 1fr;
+  }
+
+  .hero-metrics,
+  .result-panel {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .preview {
@@ -377,14 +524,26 @@ textarea:focus {
   }
 }
 
-@media (max-width: 540px) {
-  header h1 {
-    font-size: 30px;
+@media (max-width: 560px) {
+  .app {
+    padding: 12px;
   }
 
-  .client-block,
+  .hero-panel,
+  .form-panel,
+  .preview-box {
+    padding: 18px;
+  }
+
+  .hero-copy h2 {
+    font-size: 36px;
+  }
+
+  .hero-metrics,
   .result-panel,
-  .preview-actions {
+  .client-block,
+  .preview-actions,
+  .wizard-actions {
     grid-template-columns: 1fr;
   }
 

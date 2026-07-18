@@ -5,8 +5,10 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <span>Cotizador financiero</span>
-        <h1>Crédito IMSS</h1>
+        <div>
+          <span>Cotizador financiero</span>
+          <h1>Crédito IMSS</h1>
+        </div>
       </header>
       <main>
         <QuoteForm />
