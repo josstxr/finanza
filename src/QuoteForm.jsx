@@ -326,78 +326,50 @@ export default function QuoteForm() {
   }
 
   return (
-    <div className="page-shell">
-      <section className="hero-panel">
-        <div className="hero-copy">
+    <div className="advisor-shell">
+      <section className="intro-panel">
+        <div>
           <span>Crédito IMSS</span>
-          <h2>Cotización clara, rápida y lista para compartir</h2>
-          <p>
-            Un flujo guiado para capturar datos, calcular el descuento mensual y
-            entregar una propuesta profesional en PDF.
-          </p>
-          <div className="hero-metrics">
-            <div>
-              <strong>18 a 60</strong>
-              <span>meses</span>
-            </div>
-            <div>
-              <strong>PDF</strong>
-              <span>cotización</span>
-            </div>
-            <div>
-              <strong>MXN</strong>
-              <span>moneda</span>
-            </div>
-          </div>
+          <h2>Cotización ejecutiva en cinco pasos</h2>
         </div>
-        <div className="hero-rate-card">
-          <span>Estimado actual</span>
-          <strong>{formatMoney(quote.monthlyPayment)}</strong>
-          <small>{formatMoney(quote.amount)} a {form.term} meses</small>
-        </div>
+        <p>
+          Captura solo lo necesario, revisa el descuento estimado y entrega un PDF
+          formal con mensaje listo para WhatsApp.
+        </p>
       </section>
 
-      <section className="info-grid" aria-label="Información del crédito">
-        <article>
-          <span>Proceso</span>
-          <h3>Captura paso a paso</h3>
-          <p>Nombre, apellidos, contacto y crédito en una secuencia breve.</p>
-        </article>
-        <article>
-          <span>Cálculo</span>
-          <h3>Factor por plazo</h3>
-          <p>Estimación mensual calculada con el factor correspondiente.</p>
-        </article>
-        <article>
-          <span>Entrega</span>
-          <h3>PDF y WhatsApp</h3>
-          <p>PDF descargable y mensaje con los datos esenciales para enviar.</p>
-        </article>
-      </section>
-
-      <div className="quote-app">
-        <section className="form-panel" aria-label="Cuestionario de cotización">
-          <div className="panel-heading">
-            <div>
-              <span>{STEPS[activeStep].eyebrow}</span>
-              <strong>{STEPS[activeStep].title}</strong>
-            </div>
-            <small>{activeStep + 1}/{STEPS.length}</small>
+      <div className="workflow-grid">
+        <aside className="step-rail" aria-label="Progreso de cotización">
+          <div className="rail-summary">
+            <span>Avance</span>
+            <strong>{activeStep + 1} de {STEPS.length}</strong>
           </div>
-
-          <div className="stepper" aria-label="Progreso">
+          <nav>
             {STEPS.map((step, index) => (
               <button
                 key={step.title}
                 type="button"
                 className={index === activeStep ? 'active' : ''}
                 onClick={() => setActiveStep(index)}
-                aria-label={step.title}
               >
                 <span>{index + 1}</span>
-                {step.title}
+                <strong>{step.title}</strong>
               </button>
             ))}
+          </nav>
+          <div className="rail-note">
+            <span>Entrega</span>
+            <p>PDF descargable con cálculo, monto, plazo y datos del cliente.</p>
+          </div>
+        </aside>
+
+        <section className="form-panel" aria-label="Cuestionario de cotización">
+          <div className="panel-heading">
+            <div>
+              <span>{STEPS[activeStep].eyebrow}</span>
+              <strong>{STEPS[activeStep].title}</strong>
+            </div>
+            <small>{Math.round(((activeStep + 1) / STEPS.length) * 100)}%</small>
           </div>
 
           {renderStep()}
@@ -408,7 +380,7 @@ export default function QuoteForm() {
             </button>
             {activeStep < STEPS.length - 1 ? (
               <button type="button" className="primary-action" onClick={nextStep}>
-                Siguiente
+                Continuar
               </button>
             ) : (
               <button type="button" className="primary-action" onClick={sendWhatsAppWithPDF}>
@@ -419,14 +391,14 @@ export default function QuoteForm() {
         </section>
 
         <aside className="preview">
-          <div className="result-panel">
+          <div className="quote-snapshot">
             <div>
               <span>Descuento mensual</span>
               <strong>{formatMoney(quote.monthlyPayment)}</strong>
             </div>
             <div>
-              <span>Total estimado</span>
-              <strong>{formatMoney(quote.totalPayment)}</strong>
+              <span>Monto</span>
+              <strong>{formatMoney(quote.amount)}</strong>
             </div>
             <div>
               <span>Plazo</span>
