@@ -330,16 +330,25 @@ export default function QuoteForm() {
   return (
     <div className="advisor-shell">
       <section className="intro-panel">
-        <div>
-          <span>Crédito IMSS</span>
-          <h2>Cotización ejecutiva en cinco pasos</h2>
-        </div>
         <figure className="trust-photo">
           <img
             src={pensionersImage}
             alt="Pensionados recibiendo asesoria financiera con tranquilidad"
           />
         </figure>
+        <div className="intro-copy">
+          <span>Crédito IMSS</span>
+          <h2>Cotización ejecutiva en cinco pasos</h2>
+          <p>
+            Una experiencia guiada para pensionados: clara, sobria y lista para entregar
+            una propuesta formal.
+          </p>
+          <div className="trust-chips">
+            <strong>Asesoría segura</strong>
+            <strong>PDF profesional</strong>
+            <strong>Datos esenciales</strong>
+          </div>
+        </div>
       </section>
 
       <div className="workflow-grid">
