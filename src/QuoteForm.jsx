@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
+import pensionersImage from './assets/pensionados-asesoria.jpg'
+import secureDocsImage from './assets/seguridad-documentos.jpg'
 
 const FACTORS = {
   18: 73.0946,
@@ -332,10 +334,12 @@ export default function QuoteForm() {
           <span>Crédito IMSS</span>
           <h2>Cotización ejecutiva en cinco pasos</h2>
         </div>
-        <p>
-          Captura solo lo necesario, revisa el descuento estimado y entrega un PDF
-          formal con mensaje listo para WhatsApp.
-        </p>
+        <figure className="trust-photo">
+          <img
+            src={pensionersImage}
+            alt="Pensionados recibiendo asesoria financiera con tranquilidad"
+          />
+        </figure>
       </section>
 
       <div className="workflow-grid">
@@ -358,6 +362,10 @@ export default function QuoteForm() {
             ))}
           </nav>
           <div className="rail-note">
+            <img
+              src={secureDocsImage}
+              alt="Documentos revisados con seguridad y confianza"
+            />
             <span>Entrega</span>
             <p>PDF descargable con cálculo, monto, plazo y datos del cliente.</p>
           </div>
