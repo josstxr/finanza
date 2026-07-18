@@ -15,11 +15,11 @@ const FACTORS = {
 const TERM_OPTIONS = Object.keys(FACTORS).map(Number)
 
 const STEPS = [
-  { eyebrow: 'Paso 1', title: 'Nombre' },
-  { eyebrow: 'Paso 2', title: 'Apellidos' },
-  { eyebrow: 'Paso 3', title: 'Contacto' },
-  { eyebrow: 'Paso 4', title: 'Crédito' },
-  { eyebrow: 'Paso 5', title: 'Cotización' }
+  { eyebrow: 'Paso 1', title: 'Nombre', prompt: 'Comencemos con el nombre del cliente.' },
+  { eyebrow: 'Paso 2', title: 'Apellidos', prompt: 'Agrega los apellidos para identificar la cotización.' },
+  { eyebrow: 'Paso 3', title: 'Contacto', prompt: 'Captura el WhatsApp y la razón social.' },
+  { eyebrow: 'Paso 4', title: 'Crédito', prompt: 'Define el monto solicitado y el plazo.' },
+  { eyebrow: 'Paso 5', title: 'Enviar', prompt: 'Revisa la cotización y compártela.' }
 ]
 
 function formatMoney(value) {
@@ -190,6 +190,9 @@ export default function QuoteForm() {
     if (activeStep === 0) {
       return (
         <div className="step-fields">
+          <div className="step-intro">
+            <p>{STEPS[activeStep].prompt}</p>
+          </div>
           <label>
             Nombre
             <input
@@ -206,6 +209,9 @@ export default function QuoteForm() {
     if (activeStep === 1) {
       return (
         <div className="step-fields">
+          <div className="step-intro">
+            <p>{STEPS[activeStep].prompt}</p>
+          </div>
           <label>
             Apellido paterno
             <input
@@ -230,6 +236,9 @@ export default function QuoteForm() {
     if (activeStep === 2) {
       return (
         <div className="step-fields">
+          <div className="step-intro">
+            <p>{STEPS[activeStep].prompt}</p>
+          </div>
           <label>
             WhatsApp
             <input
@@ -255,6 +264,9 @@ export default function QuoteForm() {
     if (activeStep === 3) {
       return (
         <div className="step-fields">
+          <div className="step-intro">
+            <p>{STEPS[activeStep].prompt}</p>
+          </div>
           <label>
             Monto solicitado
             <input
@@ -266,19 +278,22 @@ export default function QuoteForm() {
               onChange={(event) => updateField('requestedAmount', event.target.value)}
             />
           </label>
-          <label>
-            Plazo
-            <select
-              value={form.term}
-              onChange={(event) => updateField('term', Number(event.target.value))}
-            >
+          <fieldset className="term-options">
+            <legend>Plazo</legend>
+            <div>
               {TERM_OPTIONS.map((term) => (
-                <option key={term} value={term}>
-                  {term} meses
-                </option>
+                <button
+                  key={term}
+                  type="button"
+                  className={Number(form.term) === term ? 'selected' : ''}
+                  onClick={() => updateField('term', term)}
+                >
+                  {term}
+                  <span>meses</span>
+                </button>
               ))}
-            </select>
-          </label>
+            </div>
+          </fieldset>
           <label>
             Notas
             <textarea
@@ -293,6 +308,9 @@ export default function QuoteForm() {
 
     return (
       <div className="finish-panel">
+        <div className="step-intro">
+          <p>{STEPS[activeStep].prompt}</p>
+        </div>
         <div>
           <span>Descuento mensual estimado</span>
           <strong>{formatMoney(quote.monthlyPayment)}</strong>
@@ -312,10 +330,10 @@ export default function QuoteForm() {
       <section className="hero-panel">
         <div className="hero-copy">
           <span>Crédito IMSS</span>
-          <h2>Cotiza en minutos con descuento mensual estimado</h2>
+          <h2>Cotización clara, rápida y lista para compartir</h2>
           <p>
-            Captura los datos del cliente, el monto solicitado y el plazo para generar
-            una cotización lista para descargar o compartir.
+            Un flujo guiado para capturar datos, calcular el descuento mensual y
+            entregar una propuesta profesional en PDF.
           </p>
           <div className="hero-metrics">
             <div>
@@ -342,18 +360,18 @@ export default function QuoteForm() {
       <section className="info-grid" aria-label="Información del crédito">
         <article>
           <span>Proceso</span>
-          <h3>Cuestionario guiado</h3>
-          <p>Los datos se piden en orden para evitar capturas incompletas y mantener visible el avance.</p>
+          <h3>Captura paso a paso</h3>
+          <p>Nombre, apellidos, contacto y crédito en una secuencia breve.</p>
         </article>
         <article>
           <span>Cálculo</span>
           <h3>Factor por plazo</h3>
-          <p>El descuento mensual se calcula con el factor correspondiente por cada $1,000 solicitados.</p>
+          <p>Estimación mensual calculada con el factor correspondiente.</p>
         </article>
         <article>
           <span>Entrega</span>
           <h3>PDF y WhatsApp</h3>
-          <p>La cotización se genera en PDF y el mensaje incluye nombre, razón social, monto y plazo.</p>
+          <p>PDF descargable y mensaje con los datos esenciales para enviar.</p>
         </article>
       </section>
 
@@ -376,7 +394,8 @@ export default function QuoteForm() {
                 onClick={() => setActiveStep(index)}
                 aria-label={step.title}
               >
-                {index + 1}
+                <span>{index + 1}</span>
+                {step.title}
               </button>
             ))}
           </div>
