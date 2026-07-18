@@ -12,8 +12,8 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(135deg, rgba(20, 184, 166, 0.13), transparent 30%),
-    linear-gradient(315deg, rgba(37, 99, 235, 0.11), transparent 34%),
+    linear-gradient(135deg, rgba(14, 165, 233, 0.16), transparent 30%),
+    linear-gradient(315deg, rgba(125, 211, 252, 0.18), transparent 34%),
     #f5f7fb;
 }
 
@@ -51,7 +51,7 @@ header span,
 .notes-block span,
 .result-panel span,
 .finish-panel span {
-  color: #0f766e;
+  color: #0284c7;
   display: block;
   font-size: 12px;
   font-weight: 850;
@@ -72,7 +72,7 @@ header h1 {
 }
 
 .hero-panel {
-  background: #12223a;
+  background: #0f2742;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   color: #ffffff;
@@ -86,8 +86,8 @@ header h1 {
 
 .hero-panel::after {
   background:
-    linear-gradient(135deg, rgba(16, 185, 129, 0.3), transparent 58%),
-    linear-gradient(315deg, rgba(59, 130, 246, 0.26), transparent 52%);
+    linear-gradient(135deg, rgba(14, 165, 233, 0.36), transparent 58%),
+    linear-gradient(315deg, rgba(125, 211, 252, 0.24), transparent 52%);
   content: "";
   inset: 0;
   pointer-events: none;
@@ -101,7 +101,7 @@ header h1 {
 }
 
 .hero-copy > span {
-  color: #99f6e4;
+  color: #bae6fd;
 }
 
 .hero-copy h2 {
@@ -214,10 +214,10 @@ header h1 {
 }
 
 .panel-heading small {
-  background: #e9f7f4;
-  border: 1px solid #b6e4da;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
   border-radius: 999px;
-  color: #0f766e;
+  color: #0284c7;
   font-weight: 850;
   padding: 5px 10px;
 }
@@ -239,8 +239,8 @@ header h1 {
 }
 
 .stepper button.active {
-  background: #0f766e;
-  border-color: #0f766e;
+  background: #38bdf8;
+  border-color: #38bdf8;
   color: #ffffff;
 }
 
@@ -278,8 +278,8 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
   outline: none;
 }
 
@@ -312,11 +312,11 @@ textarea:focus {
 }
 
 .primary-action {
-  background: #16a34a;
+  background: #38bdf8;
   border: 0;
   border-radius: 8px;
-  box-shadow: 0 14px 28px rgba(22, 163, 74, 0.26);
-  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(14, 165, 233, 0.26);
+  color: #07324d;
   cursor: pointer;
   font-weight: 850;
   min-height: 52px;
@@ -325,7 +325,7 @@ textarea:focus {
 }
 
 .primary-action:hover {
-  background: #15803d;
+  background: #0ea5e9;
 }
 
 .preview {
@@ -371,7 +371,7 @@ textarea:focus {
 
 .quote-header {
   align-items: start;
-  border-bottom: 3px solid #0f766e;
+  border-bottom: 3px solid #38bdf8;
   display: flex;
   justify-content: space-between;
   padding-bottom: 16px;
@@ -488,10 +488,10 @@ textarea:focus {
 }
 
 .status-message {
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
   border-radius: 8px;
-  color: #065f46;
+  color: #075985;
   font-size: 13px;
   font-weight: 750;
   margin: 0;

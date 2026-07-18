@@ -95,6 +95,7 @@ export default function QuoteForm() {
   }, [form.requestedAmount, form.term])
 
   const message = useMemo(() => {
+    const fileName = getQuoteFileName(fullName)
     const lines = [
       'Cotización Crédito IMSS',
       `Nombre: ${fullName || 'Pendiente'}`,
@@ -110,6 +111,7 @@ export default function QuoteForm() {
       lines.push(`Notas: ${form.notes.trim()}`)
     }
 
+    lines.push(`PDF generado: ${fileName}`)
     lines.push('Te comparto la cotización en PDF con el detalle.')
 
     return lines.join('\n')
@@ -164,27 +166,13 @@ export default function QuoteForm() {
 
   const sendWhatsAppWithPDF = async () => {
     try {
-      setStatus('Preparando PDF para WhatsApp...')
+      setStatus('Generando PDF y abriendo WhatsApp...')
       const pdf = await createPDF()
-      const file = new File([pdf.output('blob')], getQuoteFileName(fullName), {
-        type: 'application/pdf'
-      })
-
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          title: 'Cotización Crédito IMSS',
-          text: message,
-          files: [file]
-        })
-        setStatus('PDF listo para enviarse desde WhatsApp.')
-        return
-      }
-
-      pdf.save(file.name)
+      pdf.save(getQuoteFileName(fullName))
       openWhatsApp()
-      setStatus('Tu navegador no permite adjuntar directo. Descargué el PDF y abrí WhatsApp con el mensaje.')
+      setStatus('PDF descargado. WhatsApp se abrió con el mensaje; adjunta el PDF descargado al chat.')
     } catch {
-      setStatus('Se canceló el envío o el navegador no permitió compartir el PDF.')
+      setStatus('No pude generar el PDF o abrir WhatsApp. Intenta de nuevo.')
     }
   }
 
@@ -313,7 +301,7 @@ export default function QuoteForm() {
           Cotización preparada para {fullName || 'el cliente'} a {form.term} meses.
         </p>
         <button type="button" onClick={sendWhatsAppWithPDF}>
-          Enviar PDF por WhatsApp
+          Descargar PDF y abrir WhatsApp
         </button>
       </div>
     )
@@ -405,7 +393,7 @@ export default function QuoteForm() {
               </button>
             ) : (
               <button type="button" className="primary-action" onClick={sendWhatsAppWithPDF}>
-                Enviar PDF por WhatsApp
+                Descargar PDF y abrir WhatsApp
               </button>
             )}
           </div>
@@ -494,7 +482,7 @@ export default function QuoteForm() {
 
           <div className="preview-actions">
             <button type="button" className="primary-action" onClick={sendWhatsAppWithPDF}>
-              Enviar PDF por WhatsApp
+              Descargar PDF y abrir WhatsApp
             </button>
             <button type="button" className="ghost-action" onClick={downloadPDF}>
               Descargar PDF
