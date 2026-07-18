@@ -1,0 +1,359 @@
+import React, { useMemo, useState } from 'react'
+import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
+
+const FACTORS = {
+  18: 73.0946,
+  24: 59.4487,
+  30: 51.4355,
+  36: 46.2352,
+  42: 42.6382,
+  48: 40.039,
+  60: 36.6219
+}
+
+const TERM_OPTIONS = Object.keys(FACTORS).map(Number)
+
+function formatMoney(value) {
+  return Number(value || 0).toLocaleString('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    maximumFractionDigits: 2
+  })
+}
+
+function sanitizePhone(value) {
+  const digits = value.replace(/\D/g, '')
+
+  if (digits.length === 10) {
+    return `52${digits}`
+  }
+
+  return digits
+}
+
+function roundCurrency(value) {
+  return Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100
+}
+
+function getQuoteFileName(name) {
+  const cleanName = (name || 'cliente')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase()
+
+  return `cotizacion-imss-${cleanName || 'cliente'}.pdf`
+}
+
+export default function QuoteForm() {
+  const [status, setStatus] = useState('')
+  const [form, setForm] = useState({
+    name: '',
+    businessName: '',
+    phone: '',
+    requestedAmount: 20000,
+    term: 24,
+    notes: ''
+  })
+
+  const updateField = (key, value) => {
+    setForm((current) => ({ ...current, [key]: value }))
+  }
+
+  const quote = useMemo(() => {
+    const amount = Number(form.requestedAmount) || 0
+    const factor = FACTORS[Number(form.term)] || 0
+    const monthlyPayment = roundCurrency((amount * factor) / 1000)
+    const totalPayment = roundCurrency(monthlyPayment * Number(form.term))
+    const financeCost = roundCurrency(totalPayment - amount)
+
+    return {
+      amount,
+      factor,
+      monthlyPayment,
+      totalPayment,
+      financeCost
+    }
+  }, [form.requestedAmount, form.term])
+
+  const message = useMemo(() => {
+    const lines = [
+      `Cotización Crédito IMSS`,
+      `Nombre: ${form.name || 'Pendiente'}`,
+      `Razón social: ${form.businessName || 'Pendiente'}`,
+      `Monto solicitado: ${formatMoney(quote.amount)}`,
+      `Plazo: ${form.term} meses`,
+      `Descuento mensual estimado: ${formatMoney(quote.monthlyPayment)}`,
+      `Total estimado a pagar: ${formatMoney(quote.totalPayment)}`
+    ]
+
+    if (form.notes.trim()) {
+      lines.push(`Notas: ${form.notes.trim()}`)
+    }
+
+    lines.push('Te comparto la cotización en PDF con el detalle.')
+
+    return lines.join('\n')
+  }, [form, quote])
+
+  const createPDF = async () => {
+    const el = document.getElementById('quote-preview')
+    const canvas = await html2canvas(el, {
+      backgroundColor: '#ffffff',
+      scale: 2
+    })
+    const imgData = canvas.toDataURL('image/png')
+    const pdf = new jsPDF('p', 'pt', 'a4')
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+    const pageHeight = pdf.internal.pageSize.getHeight()
+
+    let heightLeft = pdfHeight
+    let position = 0
+
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight)
+    heightLeft -= pageHeight
+
+    while (heightLeft > 0) {
+      position = heightLeft - pdfHeight
+      pdf.addPage()
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight)
+      heightLeft -= pageHeight
+    }
+
+    return pdf
+  }
+
+  const downloadPDF = async () => {
+    try {
+      setStatus('Generando PDF...')
+      const pdf = await createPDF()
+      pdf.save(getQuoteFileName(form.name))
+      setStatus('PDF descargado correctamente.')
+    } catch {
+      setStatus('No pude generar el PDF. Revisa la información e intenta de nuevo.')
+    }
+  }
+
+  const sendWhatsAppWithPDF = async () => {
+    try {
+      setStatus('Preparando PDF para WhatsApp...')
+      const pdf = await createPDF()
+      const file = new File([pdf.output('blob')], getQuoteFileName(form.name), {
+        type: 'application/pdf'
+      })
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: 'Cotización Crédito IMSS',
+          text: message,
+          files: [file]
+        })
+        setStatus('PDF listo para enviarse desde WhatsApp.')
+        return
+      }
+
+      pdf.save(file.name)
+      openWhatsApp()
+      setStatus('Tu navegador no permite adjuntar directo. Descargué el PDF y abrí WhatsApp con el mensaje.')
+    } catch {
+      setStatus('Se canceló el envío o el navegador no permitió compartir el PDF.')
+    }
+  }
+
+  const openWhatsApp = () => {
+    const phone = sanitizePhone(form.phone)
+    const encodedMessage = encodeURIComponent(message)
+    const url = phone
+      ? `https://wa.me/${phone}?text=${encodedMessage}`
+      : `https://wa.me/?text=${encodedMessage}`
+
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  return (
+    <div className="quote-app">
+      <section className="form-panel" aria-label="Datos de la cotización">
+        <div className="panel-heading">
+          <div>
+            <span>Cotizador</span>
+            <strong>Datos del cliente</strong>
+          </div>
+          <small>MXN</small>
+        </div>
+
+        <label>
+          Nombre
+          <input
+            value={form.name}
+            onChange={(event) => updateField('name', event.target.value)}
+            placeholder="Nombre del cliente"
+          />
+        </label>
+
+        <label>
+          Razón social
+          <input
+            value={form.businessName}
+            onChange={(event) => updateField('businessName', event.target.value)}
+            placeholder="Empresa o razón social"
+          />
+        </label>
+
+        <label>
+          WhatsApp
+          <input
+            inputMode="tel"
+            value={form.phone}
+            onChange={(event) => updateField('phone', event.target.value)}
+            placeholder="10 dígitos o con lada"
+          />
+        </label>
+
+        <div className="field-grid">
+          <label>
+            Monto solicitado
+            <input
+              type="number"
+              min="0"
+              step="100"
+              value={form.requestedAmount}
+              onChange={(event) => updateField('requestedAmount', event.target.value)}
+            />
+          </label>
+
+          <label>
+            Plazo
+            <select
+              value={form.term}
+              onChange={(event) => updateField('term', Number(event.target.value))}
+            >
+              {TERM_OPTIONS.map((term) => (
+                <option key={term} value={term}>
+                  {term} meses
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <label>
+          Notas
+          <textarea
+            value={form.notes}
+            onChange={(event) => updateField('notes', event.target.value)}
+            placeholder="Observaciones, vigencia o documentos pendientes"
+          />
+        </label>
+
+        <div className="summary-strip">
+          <div>
+            <span>Descuento mensual</span>
+            <strong>{formatMoney(quote.monthlyPayment)}</strong>
+          </div>
+          <button type="button" onClick={sendWhatsAppWithPDF}>
+            Enviar PDF por WhatsApp
+          </button>
+        </div>
+      </section>
+
+      <aside className="preview">
+        <div className="result-panel">
+          <div>
+            <span>Descuento mensual</span>
+            <strong>{formatMoney(quote.monthlyPayment)}</strong>
+          </div>
+          <div>
+            <span>Total estimado</span>
+            <strong>{formatMoney(quote.totalPayment)}</strong>
+          </div>
+          <div>
+            <span>Plazo</span>
+            <strong>{form.term} meses</strong>
+          </div>
+        </div>
+
+        <div id="quote-preview" className="preview-box">
+          <div className="quote-header">
+            <div>
+              <span>Cotización</span>
+              <h2>Crédito IMSS</h2>
+            </div>
+            <time>{new Date().toLocaleDateString('es-MX')}</time>
+          </div>
+
+          <div className="client-block">
+            <div>
+              <span>Nombre</span>
+              <strong>{form.name || '-'}</strong>
+            </div>
+            <div>
+              <span>Razón social</span>
+              <strong>{form.businessName || '-'}</strong>
+            </div>
+            <div>
+              <span>WhatsApp</span>
+              <strong>{form.phone || '-'}</strong>
+            </div>
+          </div>
+
+          <table className="quote-table">
+            <tbody>
+              <tr>
+                <th>Monto solicitado</th>
+                <td>{formatMoney(quote.amount)}</td>
+              </tr>
+              <tr>
+                <th>Plazo</th>
+                <td>{form.term} meses</td>
+              </tr>
+              <tr>
+                <th>Factor</th>
+                <td>{quote.factor.toFixed(4)}</td>
+              </tr>
+              <tr>
+                <th>Descuento mensual estimado</th>
+                <td>{formatMoney(quote.monthlyPayment)}</td>
+              </tr>
+              <tr>
+                <th>Total estimado a pagar</th>
+                <td>{formatMoney(quote.totalPayment)}</td>
+              </tr>
+              <tr>
+                <th>Costo financiero estimado</th>
+                <td>{formatMoney(quote.financeCost)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {form.notes.trim() ? (
+            <div className="notes-block">
+              <span>Notas</span>
+              <p>{form.notes.trim()}</p>
+            </div>
+          ) : null}
+
+          <p className="quote-footnote">
+            Cálculo estimado con factor por cada $1,000 de monto solicitado.
+          </p>
+        </div>
+
+        <div className="preview-actions">
+          <button type="button" className="primary-action" onClick={sendWhatsAppWithPDF}>
+            Enviar PDF por WhatsApp
+          </button>
+          <button type="button" className="ghost-action" onClick={downloadPDF}>
+            Descargar PDF
+          </button>
+          <button type="button" className="ghost-action" onClick={openWhatsApp}>
+            Solo mensaje
+          </button>
+        </div>
+
+        {status ? <p className="status-message">{status}</p> : null}
+      </aside>
+    </div>
+  )
+}
