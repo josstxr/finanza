@@ -338,7 +338,7 @@ export default function QuoteForm() {
         </figure>
         <div className="intro-copy">
           <span>Crédito IMSS</span>
-          <h2>Cotización ejecutiva en cinco pasos</h2>
+          <h2>Cotización con una presencia más confiable</h2>
           <p>
             Una experiencia guiada para pensionados: clara, sobria y lista para entregar
             una propuesta formal.
@@ -349,13 +349,32 @@ export default function QuoteForm() {
             <strong>Datos esenciales</strong>
           </div>
         </div>
+        <div className="hero-quote-card">
+          <span>Descuento mensual estimado</span>
+          <strong>{formatMoney(quote.monthlyPayment)}</strong>
+          <small>{formatMoney(quote.amount)} a {form.term} meses</small>
+        </div>
       </section>
+
+      <div className="mobile-progress" aria-label="Progreso">
+        {STEPS.map((step, index) => (
+          <button
+            key={step.title}
+            type="button"
+            className={index === activeStep ? 'active' : ''}
+            onClick={() => setActiveStep(index)}
+            aria-label={step.title}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
 
       <div className="workflow-grid">
         <aside className="step-rail" aria-label="Progreso de cotización">
           <div className="rail-summary">
-            <span>Avance</span>
-            <strong>{activeStep + 1} de {STEPS.length}</strong>
+            <span>Progreso</span>
+            <strong>{Math.round(((activeStep + 1) / STEPS.length) * 100)}%</strong>
           </div>
           <nav>
             {STEPS.map((step, index) => (
@@ -408,21 +427,6 @@ export default function QuoteForm() {
         </section>
 
         <aside className="preview">
-          <div className="quote-snapshot">
-            <div>
-              <span>Descuento mensual</span>
-              <strong>{formatMoney(quote.monthlyPayment)}</strong>
-            </div>
-            <div>
-              <span>Monto</span>
-              <strong>{formatMoney(quote.amount)}</strong>
-            </div>
-            <div>
-              <span>Plazo</span>
-              <strong>{form.term} meses</strong>
-            </div>
-          </div>
-
           <div id="quote-preview" className="preview-box">
             <div className="quote-header">
               <div>
