@@ -1,0 +1,6 @@
+.DS_Store
+dist
+node_modules
+src/assets/*.png
+src/QuoteForm 2.jsx
+src/styles 2.css
